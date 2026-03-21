@@ -1,598 +1,886 @@
 <!doctype html>
 <html lang="id" class="h-full">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulasi Kelas Pintar</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulasi Kelas Pintar Premium</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <script src="/_sdk/element_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { font-family: 'Nunito', sans-serif; }
-
-    @keyframes personWalk {
-      0%, 100% { transform: translate(0, 0); }
-      25% { transform: translate(var(--dx1), var(--dy1)); }
-      50% { transform: translate(var(--dx2), var(--dy2)); }
-      75% { transform: translate(var(--dx3), var(--dy3)); }
+    html, body { height: 100%; }
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(34,197,94,0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(59,130,246,0.10), transparent 24%),
+        linear-gradient(180deg, #020617 0%, #0f172a 100%);
     }
 
-    @keyframes pulse-glow {
-      0%, 100% { filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.8)); }
-      50% { filter: drop-shadow(0 0 20px rgba(250, 204, 21, 1)); }
+    .glass {
+      background: rgba(15, 23, 42, 0.72);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      box-shadow: 0 16px 40px rgba(2, 6, 23, 0.45);
     }
 
-    @keyframes sensor-ring {
-      0% { transform: scale(0.8); opacity: 0.6; }
-      100% { transform: scale(1.5); opacity: 0; }
+    .hero-grid {
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+      background-size: 28px 28px;
     }
 
-    .lamp-on { animation: pulse-glow 2s ease-in-out infinite; }
-    .sensor-ring { animation: sensor-ring 1.5s ease-out infinite; }
+    .classroom-floor {
+      background:
+        linear-gradient(180deg, rgba(30,41,59,0.18), rgba(15,23,42,0.1)),
+        repeating-linear-gradient(0deg, transparent, transparent 35px, rgba(148,163,184,0.08) 35px, rgba(148,163,184,0.08) 36px),
+        repeating-linear-gradient(90deg, transparent, transparent 35px, rgba(148,163,184,0.08) 35px, rgba(148,163,184,0.08) 36px),
+        linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    }
+
+    .desk {
+      background: linear-gradient(135deg, #8b7355, #5f4c3c);
+      border: 1px solid rgba(68, 64, 60, 0.85);
+      border-radius: 10px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 12px rgba(0,0,0,0.18);
+    }
+
+    .whiteboard {
+      background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+      border: 3px solid #94a3b8;
+      border-radius: 12px;
+      box-shadow: inset 0 0 16px rgba(255,255,255,0.55);
+    }
+
+    .teacher-desk {
+      background: linear-gradient(135deg, #6b7280, #374151);
+      border: 1px solid rgba(148,163,184,0.3);
+      border-radius: 12px;
+    }
+
+    .door {
+      background: linear-gradient(180deg, #a16207, #78350f);
+      border-top: 3px solid rgba(253,224,71,0.38);
+      box-shadow: 0 -6px 16px rgba(0,0,0,0.25);
+    }
 
     .light-cone {
-      transition: opacity 0.6s ease;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      filter: blur(1px);
     }
 
-    .person-dot {
-      transition: left 0.05s linear, top 0.05s linear;
+    .lamp-orb {
+      transition: all 0.28s ease;
     }
 
-    .control-card {
-      backdrop-filter: blur(12px);
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(100, 116, 139, 0.3);
+    .lamp-on {
+      animation: pulseGlow 1.8s infinite ease-in-out;
     }
 
-    .stat-pill {
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
-      border: 1px solid rgba(34, 197, 94, 0.3);
+    .sensor-pulse {
+      animation: sensorPulse 1.5s infinite ease-out;
     }
 
-    .info-card {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.05));
-      border: 1px solid rgba(59, 130, 246, 0.2);
+    .person {
+      transition: left 0.06s linear, top 0.06s linear, transform 0.12s ease;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.28));
+    }
+
+    .mini-progress {
+      background: rgba(51, 65, 85, 0.9);
+      overflow: hidden;
+    }
+
+    .mini-progress > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #84cc16);
+      transition: width 0.2s ease;
+    }
+
+    .status-card.active {
+      border-color: rgba(250,204,21,0.65);
+      background: linear-gradient(180deg, rgba(250,204,21,0.14), rgba(250,204,21,0.05));
+      box-shadow: 0 0 0 1px rgba(250,204,21,0.2) inset;
     }
 
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
-      height: 6px;
-      border-radius: 3px;
-      background: rgba(100, 116, 139, 0.4);
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(71, 85, 105, 0.8);
       outline: none;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: #22c55e;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #4ade80, #22c55e);
+      border: 2px solid white;
+      box-shadow: 0 4px 12px rgba(34,197,94,0.35);
       cursor: pointer;
-      border: 2px solid #fff;
     }
 
-    .classroom-floor {
-      background:
-        repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 39px,
-          rgba(148, 163, 184, 0.08) 39px,
-          rgba(148, 163, 184, 0.08) 40px
-        ),
-        repeating-linear-gradient(
-          90deg,
-          transparent,
-          transparent 39px,
-          rgba(148, 163, 184, 0.08) 39px,
-          rgba(148, 163, 184, 0.08) 40px
-        );
+    input[type="number"] {
+      background: rgba(2, 6, 23, 0.55);
+      border: 1px solid rgba(71, 85, 105, 0.7);
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      width: 100%;
+      outline: none;
     }
 
-    .desk {
-      background: linear-gradient(135deg, #78716c, #57534e);
-      border: 1px solid #44403c;
-      border-radius: 3px;
+    .toggle-track, .toggle-thumb {
+      transition: all 0.25s ease;
     }
 
-    .whiteboard {
-      background: linear-gradient(180deg, #f1f5f9, #e2e8f0);
-      border: 2px solid #94a3b8;
-      border-radius: 4px;
+    .log-scroll::-webkit-scrollbar {
+      width: 8px;
+    }
+    .log-scroll::-webkit-scrollbar-thumb {
+      background: rgba(71,85,105,0.8);
+      border-radius: 999px;
     }
 
-    .toggle-track {
-      transition: background-color 0.3s;
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 0 rgba(250,204,21,0), 0 0 18px rgba(250,204,21,0.5), 0 0 34px rgba(250,204,21,0.2);
+      }
+      50% {
+        box-shadow: 0 0 0 rgba(250,204,21,0), 0 0 28px rgba(250,204,21,0.9), 0 0 56px rgba(250,204,21,0.35);
+      }
     }
-    .toggle-thumb {
-      transition: transform 0.3s;
+
+    @keyframes sensorPulse {
+      0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.6; }
+      100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
     }
   </style>
-  <style>body { box-sizing: border-box; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
- </head>
- <body class="h-full bg-slate-950 text-slate-100 overflow-auto">
-  <div id="app-wrapper" class="w-full h-full min-h-full flex flex-col"><!-- Header -->
-   <header class="w-full px-4 py-3 bg-slate-900 border-b border-slate-800 flex-shrink-0">
-    <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
-     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center"><i data-lucide="lightbulb" class="w-5 h-5 text-white"></i>
+</head>
+<body class="text-slate-100 overflow-auto">
+  <div class="min-h-full">
+    <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/75 backdrop-blur-xl">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 via-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-900/40">
+            <i data-lucide="building-2" class="w-6 h-6 text-white"></i>
+          </div>
+          <div>
+            <h1 class="text-xl md:text-2xl font-black tracking-tight">Simulasi Kelas Pintar Premium</h1>
+            <p class="text-sm text-slate-400 font-semibold">Lampu Otomatis • Sensor Gerak • Analitik Energi • Biaya Listrik</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <div class="glass rounded-2xl px-4 py-2 flex items-center gap-3">
+            <i data-lucide="lightbulb" class="w-4 h-4 text-yellow-300"></i>
+            <div>
+              <div class="text-[11px] text-slate-400 font-bold uppercase tracking-wide">Lampu Aktif</div>
+              <div id="header-lamps-on" class="text-sm font-extrabold text-yellow-300">0 / 6</div>
+            </div>
+          </div>
+          <div class="glass rounded-2xl px-4 py-2 flex items-center gap-3">
+            <i data-lucide="zap" class="w-4 h-4 text-green-400"></i>
+            <div>
+              <div class="text-[11px] text-slate-400 font-bold uppercase tracking-wide">Energi Hari Ini</div>
+              <div id="header-energy" class="text-sm font-extrabold text-green-400">0.000 kWh</div>
+            </div>
+          </div>
+          <div class="glass rounded-2xl px-4 py-2 flex items-center gap-3">
+            <i data-lucide="banknote" class="w-4 h-4 text-cyan-300"></i>
+            <div>
+              <div class="text-[11px] text-slate-400 font-bold uppercase tracking-wide">Biaya Bulanan</div>
+              <div id="header-cost" class="text-sm font-extrabold text-cyan-300">Rp 0</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-       <h1 id="page-title" class="text-lg font-900 tracking-tight text-white">Simulasi Kelas Pintar</h1>
-       <p class="text-xs text-slate-400 font-600">Sensor Gerak &amp; Lampu Otomatis</p>
-      </div>
-     </div>
-     <div class="flex items-center gap-3">
-      <div id="energy-pill" class="stat-pill px-3 py-1.5 rounded-full flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-green-400"></i> <span id="energy-display" class="text-sm font-700 text-green-400">0.0 Wh</span>
-      </div>
-      <div id="lamp-status-pill" class="stat-pill px-3 py-1.5 rounded-full flex items-center gap-2"><i data-lucide="lightbulb" class="w-4 h-4 text-yellow-400"></i> <span id="lamps-on-display" class="text-sm font-700 text-yellow-400">0/6 ON</span>
-      </div>
-     </div>
-    </div>
-   </header><!-- Main Content -->
-   <main class="flex-1 w-full max-w-7xl mx-auto p-4 flex flex-col lg:flex-row gap-4"><!-- Classroom View -->
-    <section class="flex-1 flex flex-col gap-3">
-     <div class="relative w-full classroom-floor rounded-2xl border border-slate-700 overflow-hidden" style="padding-bottom: 65%; background-color: #1a1f2e;">
-      <div id="classroom" class="absolute inset-0"><!-- Whiteboard -->
-       <div class="whiteboard absolute top-2 left-1/2 -translate-x-1/2" style="width: 45%; height: 5%;"><span class="absolute inset-0 flex items-center justify-center text-slate-500 text-xs font-700">PAPAN TULIS</span>
-       </div><!-- Teacher desk -->
-       <div class="desk absolute" style="top: 10%; left: 50%; transform: translateX(-50%); width: 18%; height: 5%;"><span class="absolute inset-0 flex items-center justify-center text-stone-300 text-xs font-600" style="font-size: 0.55rem;">Meja Guru</span>
-       </div><!-- Student desks -->
-       <div id="desks-container" class="absolute" style="top: 22%; left: 8%; right: 8%; bottom: 8%;"></div><!-- Lamps layer -->
-       <div id="lamps-layer" class="absolute inset-0 pointer-events-none"></div><!-- People layer -->
-       <div id="people-layer" class="absolute inset-0 pointer-events-none"></div><!-- Door -->
-       <div class="absolute bottom-0 right-4 w-10 h-5 bg-amber-900 border-t-2 border-amber-700 rounded-t-md flex items-center justify-center"><span class="text-amber-300 font-700" style="font-size: 0.5rem;">PINTU</span>
-       </div>
-      </div>
-     </div><!-- Lamp Status Grid -->
-     <div id="lamp-status-grid" class="grid grid-cols-3 sm:grid-cols-6 gap-2"></div>
-    </section><!-- Controls Panel -->
-    <aside class="w-full lg:w-80 flex flex-col gap-3 flex-shrink-0"><!-- Controls -->
-     <div class="control-card rounded-xl p-4 space-y-4">
-      <h2 class="font-800 text-sm text-slate-300 flex items-center gap-2"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-green-400"></i> PANEL KONTROL</h2><!-- People count -->
-      <div><label class="flex justify-between text-xs text-slate-400 mb-1"> <span>Jumlah Orang</span> <span id="people-count-label" class="text-green-400 font-700">3</span> </label> <input type="range" id="people-slider" min="0" max="15" value="3" class="w-full">
-      </div><!-- Timeout -->
-      <div><label class="flex justify-between text-xs text-slate-400 mb-1"> <span>Waktu Lampu Mati (detik)</span> <span id="timeout-label" class="text-green-400 font-700">10</span> </label> <input type="range" id="timeout-slider" min="3" max="30" value="10" class="w-full">
-      </div><!-- Sensor toggle -->
-      <div class="flex items-center justify-between"><span class="text-xs text-slate-400">Sensor Gerak</span> <button id="sensor-toggle" class="relative w-11 h-6 rounded-full toggle-track bg-green-500 flex items-center px-0.5" aria-label="Toggle sensor">
-        <div class="toggle-thumb w-5 h-5 bg-white rounded-full shadow transform translate-x-5"></div></button>
-      </div><!-- Simulation controls -->
-      <div class="flex gap-2"><button id="btn-play" class="flex-1 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white text-sm font-700 flex items-center justify-center gap-1.5 transition-colors"> <i data-lucide="play" class="w-4 h-4"></i> Mulai </button> <button id="btn-reset" class="flex-1 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm font-700 flex items-center justify-center gap-1.5 transition-colors"> <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset </button>
-      </div>
-     </div><!-- Energy Stats -->
-     <div class="control-card rounded-xl p-4 space-y-3">
-      <h2 class="font-800 text-sm text-slate-300 flex items-center gap-2"><i data-lucide="bar-chart-3" class="w-4 h-4 text-yellow-400"></i> STATISTIK ENERGI</h2>
-      <div class="space-y-2 text-xs">
-       <div class="flex justify-between text-slate-400"><span>Daya per lampu</span> <span class="text-slate-200 font-700">15 Watt</span>
-       </div>
-       <div class="flex justify-between text-slate-400"><span>Lampu menyala</span> <span id="stat-lamps" class="text-yellow-400 font-700">0</span>
-       </div>
-       <div class="flex justify-between text-slate-400"><span>Total daya saat ini</span> <span id="stat-power" class="text-orange-400 font-700">0 W</span>
-       </div>
-       <div class="flex justify-between text-slate-400"><span>Total energi</span> <span id="stat-energy" class="text-green-400 font-700">0.00 Wh</span>
-       </div>
-       <div class="flex justify-between text-slate-400"><span>Waktu simulasi</span> <span id="stat-time" class="text-blue-400 font-700">0 detik</span>
-       </div>
-       <div class="flex justify-between text-slate-400 pt-1 border-t border-slate-700"><span>Penghematan vs selalu ON</span> <span id="stat-saving" class="text-emerald-400 font-700">0%</span>
-       </div>
-      </div>
-     </div><!-- Explanation -->
-     <div class="info-card rounded-xl p-4 space-y-2">
-      <h2 id="explanation-title" class="font-800 text-sm text-blue-300 flex items-center gap-2"><i data-lucide="info" class="w-4 h-4"></i> Cara Kerja Sensor Gerak</h2>
-      <div class="text-xs text-slate-400 leading-relaxed space-y-2">
-       <p><span class="text-blue-300 font-700">1. Deteksi:</span> Sensor PIR (Passive Infrared) mendeteksi radiasi inframerah dari tubuh manusia yang bergerak.</p>
-       <p><span class="text-green-300 font-700">2. Aktivasi:</span> Saat gerakan terdeteksi dalam jangkauan sensor, sinyal dikirim ke sistem kontrol lampu.</p>
-       <p><span class="text-yellow-300 font-700">3. Penyalaan:</span> Lampu menyala otomatis selama ada gerakan. Timer mulai berjalan saat gerakan berhenti.</p>
-       <p><span class="text-red-300 font-700">4. Pemadaman:</span> Jika tidak ada gerakan selama waktu yang ditentukan, lampu mati otomatis untuk menghemat energi.</p>
-      </div>
-     </div>
-    </aside>
-   </main>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-5 grid xl:grid-cols-[1.4fr_380px] gap-5">
+      <section class="space-y-5">
+        <div class="glass hero-grid rounded-3xl p-4 md:p-5">
+          <div class="grid lg:grid-cols-[1.2fr_0.8fr] gap-4 items-center">
+            <div>
+              <div class="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-bold text-emerald-300 mb-3">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                Simulasi Interaktif Real-Time
+              </div>
+              <h2 class="text-2xl md:text-3xl font-black leading-tight">Pantau lampu, sensor, pergerakan orang, energi, dan biaya listrik dalam satu tampilan.</h2>
+              <p class="text-slate-400 mt-3 max-w-2xl">Versi revisi ini dibuat lebih modern, lebih informatif, dan lebih cocok untuk presentasi atau demo sekolah pintar. Ada panel statistik, log aktivitas, kontrol lanjutan, serta status setiap lampu secara real-time.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-4">
+                <div class="text-xs uppercase tracking-wide text-slate-500 font-bold">Energi Harian</div>
+                <div id="dailyEnergyCard" class="text-2xl font-black text-green-400 mt-2">0.000 kWh</div>
+              </div>
+              <div class="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-4">
+                <div class="text-xs uppercase tracking-wide text-slate-500 font-bold">Energi Bulanan</div>
+                <div id="monthlyEnergyCard" class="text-2xl font-black text-lime-300 mt-2">0.000 kWh</div>
+              </div>
+              <div class="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-4">
+                <div class="text-xs uppercase tracking-wide text-slate-500 font-bold">Daya Aktif</div>
+                <div id="activePowerCard" class="text-2xl font-black text-amber-300 mt-2">0 W</div>
+              </div>
+              <div class="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-4">
+                <div class="text-xs uppercase tracking-wide text-slate-500 font-bold">Waktu Simulasi</div>
+                <div id="simTimeCard" class="text-2xl font-black text-sky-300 mt-2">00:00:00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass rounded-3xl p-4 md:p-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 class="text-lg font-black">Tampilan Kelas</h3>
+              <p class="text-sm text-slate-400">Orang bergerak di dalam kelas, sensor mendeteksi gerakan, lalu lampu menyala sesuai area.</p>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-400 font-semibold">
+              <span class="w-3 h-3 rounded-full bg-yellow-300 inline-block"></span> Lampu ON
+              <span class="w-3 h-3 rounded-full bg-slate-600 inline-block ml-3"></span> Lampu OFF
+              <span class="w-3 h-3 rounded-full bg-emerald-400 inline-block ml-3"></span> Sensor aktif
+            </div>
+          </div>
+
+          <div class="relative w-full classroom-floor rounded-[28px] border border-slate-700/80 overflow-hidden shadow-2xl" style="padding-bottom: 62%;">
+            <div id="classroom" class="absolute inset-0">
+              <div class="whiteboard absolute top-[3.5%] left-1/2 -translate-x-1/2 w-[46%] h-[8%] flex items-center justify-center text-slate-500 font-black text-xs tracking-wider">PAPAN TULIS DIGITAL</div>
+              <div class="teacher-desk absolute top-[13%] left-1/2 -translate-x-1/2 w-[18%] h-[6%] flex items-center justify-center text-slate-200 text-[11px] font-bold">MEJA GURU</div>
+              <div id="desks-container" class="absolute top-[23%] left-[7%] right-[7%] bottom-[9%]"></div>
+              <div id="lamps-layer" class="absolute inset-0 pointer-events-none"></div>
+              <div id="people-layer" class="absolute inset-0 pointer-events-none"></div>
+              <div class="door absolute bottom-0 right-4 w-14 h-7 rounded-t-xl flex items-center justify-center text-[10px] text-amber-200 font-bold tracking-wide">PINTU</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-[1fr_1fr] gap-5">
+          <div class="glass rounded-3xl p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-black">Status Tiap Lampu</h3>
+              <div class="text-xs text-slate-400">Realtime per area sensor</div>
+            </div>
+            <div id="lamp-status-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3"></div>
+          </div>
+          <div class="glass rounded-3xl p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-black">Log Aktivitas</h3>
+              <div class="text-xs text-slate-400">Deteksi sensor & perubahan status</div>
+            </div>
+            <div id="activity-log" class="log-scroll max-h-[320px] overflow-auto space-y-2 pr-1"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="space-y-5">
+        <div class="glass rounded-3xl p-4 space-y-4">
+          <div class="flex items-center gap-2">
+            <i data-lucide="sliders-horizontal" class="w-5 h-5 text-emerald-400"></i>
+            <h3 class="font-black">Panel Kontrol Utama</h3>
+          </div>
+
+          <div>
+            <label class="flex justify-between text-xs text-slate-400 mb-2 font-bold">
+              <span>Jumlah Orang</span>
+              <span id="people-count-label" class="text-emerald-400">3</span>
+            </label>
+            <input type="range" id="people-slider" min="0" max="15" value="3" class="w-full">
+          </div>
+
+          <div>
+            <label class="flex justify-between text-xs text-slate-400 mb-2 font-bold">
+              <span>Durasi Sensor / Lampu Mati</span>
+              <span id="timeout-label" class="text-emerald-400">10 detik</span>
+            </label>
+            <input type="range" id="timeout-slider" min="3" max="30" value="10" class="w-full">
+          </div>
+
+          <div>
+            <label class="flex justify-between text-xs text-slate-400 mb-2 font-bold">
+              <span>Kecepatan Simulasi</span>
+              <span id="speed-label" class="text-emerald-400">1.0x</span>
+            </label>
+            <input type="range" id="speed-slider" min="0.5" max="4" value="1" step="0.1" class="w-full">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-slate-400 mb-2 block font-bold">Daya per Lampu (W)</label>
+              <input id="power-input" type="number" min="1" step="1" value="15">
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-2 block font-bold">Tarif Listrik (Rp/kWh)</label>
+              <input id="tariff-input" type="number" min="1" step="1" value="1445">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-slate-400 mb-2 block font-bold">Hari per Bulan</label>
+              <input id="days-input" type="number" min="1" max="31" step="1" value="30">
+            </div>
+            <div class="flex items-end">
+              <button id="spawn-btn" class="w-full rounded-2xl bg-sky-600 hover:bg-sky-500 transition-colors text-white py-3 font-black">Acak Ulang Posisi</button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between rounded-2xl border border-slate-700 bg-slate-900/60 px-4 py-3">
+            <div>
+              <div class="text-sm font-bold">Sensor Gerak</div>
+              <div class="text-xs text-slate-400">Aktifkan / nonaktifkan sensor PIR</div>
+            </div>
+            <button id="sensor-toggle" class="relative w-12 h-7 rounded-full toggle-track bg-emerald-500 px-1 flex items-center" aria-label="Toggle sensor">
+              <div class="toggle-thumb w-5 h-5 rounded-full bg-white shadow translate-x-5"></div>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-3 gap-3">
+            <button id="btn-play" class="rounded-2xl bg-emerald-600 hover:bg-emerald-500 transition-colors py-3 font-black text-white flex items-center justify-center gap-2">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              Mulai
+            </button>
+            <button id="btn-step" class="rounded-2xl bg-amber-600 hover:bg-amber-500 transition-colors py-3 font-black text-white flex items-center justify-center gap-2">
+              <i data-lucide="skip-forward" class="w-4 h-4"></i>
+              Step
+            </button>
+            <button id="btn-reset" class="rounded-2xl bg-slate-700 hover:bg-slate-600 transition-colors py-3 font-black text-slate-100 flex items-center justify-center gap-2">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="glass rounded-3xl p-4 space-y-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-yellow-400"></i>
+            <h3 class="font-black">Statistik Energi</h3>
+          </div>
+
+          <div class="space-y-3 text-sm">
+            <div class="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-3">
+              <span class="text-slate-400">Lampu Menyala</span>
+              <span id="stat-lamps" class="font-black text-yellow-300">0</span>
+            </div>
+            <div class="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-3">
+              <span class="text-slate-400">Total Daya Saat Ini</span>
+              <span id="stat-power" class="font-black text-amber-300">0 W</span>
+            </div>
+            <div class="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-3">
+              <span class="text-slate-400">Energi Hari Ini</span>
+              <span id="stat-energy-daily" class="font-black text-green-400">0.000 kWh</span>
+            </div>
+            <div class="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-3">
+              <span class="text-slate-400">Energi Bulanan</span>
+              <span id="stat-energy-monthly" class="font-black text-lime-300">0.000 kWh</span>
+            </div>
+            <div class="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-3">
+              <span class="text-slate-400">Biaya Bulanan</span>
+              <span id="stat-cost" class="font-black text-cyan-300">Rp 0</span>
+            </div>
+            <div class="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-900/70 px-4 py-3">
+              <span class="text-slate-400">Penghematan vs Semua Lampu ON</span>
+              <span id="stat-saving" class="font-black text-emerald-300">0%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass rounded-3xl p-4 space-y-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="info" class="w-5 h-5 text-sky-400"></i>
+            <h3 class="font-black">Cara Kerja Sistem</h3>
+          </div>
+          <div class="space-y-3 text-sm text-slate-400 leading-relaxed">
+            <p><span class="text-sky-300 font-bold">1. Deteksi Gerak:</span> Sensor PIR memantau pergerakan orang di area sekitar lampu.</p>
+            <p><span class="text-emerald-300 font-bold">2. Aktivasi Lampu:</span> Saat ada gerakan, lampu area tersebut menyala dan timer direset.</p>
+            <p><span class="text-yellow-300 font-bold">3. Timeout Otomatis:</span> Jika area tidak lagi mendeteksi gerak, lampu akan mati setelah durasi timeout selesai.</p>
+            <p><span class="text-cyan-300 font-bold">4. Analitik Energi:</span> Sistem menghitung energi harian, proyeksi bulanan, dan estimasi biaya listrik otomatis.</p>
+          </div>
+        </div>
+      </aside>
+    </main>
   </div>
+
   <script>
-    // ===================== CONFIG & STATE =====================
-    const LAMP_POWER = 15; // watts
-    const SENSOR_RADIUS_PERCENT = 18; // % of classroom width
-
-    const defaultConfig = {
-      page_title: 'Simulasi Kelas Pintar',
-      sensor_explanation_title: 'Cara Kerja Sensor Gerak',
-      bg_color: '#0f172a',
-      surface_color: '#1a1f2e',
-      text_color: '#e2e8f0',
-      accent_color: '#22c55e',
-      highlight_color: '#facc15',
-      font_family: 'Nunito'
-    };
-
-    // Lamp positions (% of classroom)
+    const SENSOR_RADIUS_PERCENT = 16;
     const lampPositions = [
-      { x: 20, y: 25 }, { x: 50, y: 25 }, { x: 80, y: 25 },
-      { x: 20, y: 65 }, { x: 50, y: 65 }, { x: 80, y: 65 }
+      { x: 20, y: 24 }, { x: 50, y: 24 }, { x: 80, y: 24 },
+      { x: 20, y: 66 }, { x: 50, y: 66 }, { x: 80, y: 66 }
     ];
 
-    let lamps = lampPositions.map((pos, i) => ({
-      id: i,
-      x: pos.x,
-      y: pos.y,
-      on: false,
-      timer: 0
-    }));
+    const state = {
+      running: false,
+      sensorEnabled: true,
+      timeout: 10,
+      peopleCount: 3,
+      simSpeed: 1,
+      lampPower: 15,
+      tariff: 1445,
+      daysPerMonth: 30,
+      dailyEnergyKWh: 0,
+      simTime: 0,
+      lastTime: 0,
+      raf: null,
+      lamps: lampPositions.map((pos, i) => ({
+        id: i,
+        x: pos.x,
+        y: pos.y,
+        on: false,
+        timer: 0,
+        detected: false
+      })),
+      people: []
+    };
 
-    let people = [];
-    let running = false;
-    let sensorEnabled = true;
-    let timeout = 10;
-    let peopleCount = 3;
-    let totalEnergy = 0;
-    let simTime = 0;
-    let animFrame = null;
-    let lastTime = 0;
+    const el = {
+      desks: document.getElementById('desks-container'),
+      lampsLayer: document.getElementById('lamps-layer'),
+      peopleLayer: document.getElementById('people-layer'),
+      lampStatusGrid: document.getElementById('lamp-status-grid'),
+      log: document.getElementById('activity-log'),
+      peopleSlider: document.getElementById('people-slider'),
+      peopleCountLabel: document.getElementById('people-count-label'),
+      timeoutSlider: document.getElementById('timeout-slider'),
+      timeoutLabel: document.getElementById('timeout-label'),
+      speedSlider: document.getElementById('speed-slider'),
+      speedLabel: document.getElementById('speed-label'),
+      powerInput: document.getElementById('power-input'),
+      tariffInput: document.getElementById('tariff-input'),
+      daysInput: document.getElementById('days-input'),
+      sensorToggle: document.getElementById('sensor-toggle'),
+      play: document.getElementById('btn-play'),
+      step: document.getElementById('btn-step'),
+      reset: document.getElementById('btn-reset'),
+      spawn: document.getElementById('spawn-btn'),
+      headerLampsOn: document.getElementById('header-lamps-on'),
+      headerEnergy: document.getElementById('header-energy'),
+      headerCost: document.getElementById('header-cost'),
+      dailyEnergyCard: document.getElementById('dailyEnergyCard'),
+      monthlyEnergyCard: document.getElementById('monthlyEnergyCard'),
+      activePowerCard: document.getElementById('activePowerCard'),
+      simTimeCard: document.getElementById('simTimeCard'),
+      statLamps: document.getElementById('stat-lamps'),
+      statPower: document.getElementById('stat-power'),
+      statEnergyDaily: document.getElementById('stat-energy-daily'),
+      statEnergyMonthly: document.getElementById('stat-energy-monthly'),
+      statCost: document.getElementById('stat-cost'),
+      statSaving: document.getElementById('stat-saving')
+    };
 
-    // ===================== INIT CLASSROOM =====================
+    function formatClock(seconds) {
+      const sec = Math.floor(seconds % 60);
+      const min = Math.floor((seconds / 60) % 60);
+      const hr = Math.floor((seconds / 3600) % 24);
+      return [hr, min, sec].map(v => String(v).padStart(2, '0')).join(':');
+    }
+
+    function formatRp(value) {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function addLog(text, tone = 'slate') {
+      const tones = {
+        slate: 'border-slate-800 bg-slate-900/70 text-slate-300',
+        green: 'border-emerald-900/60 bg-emerald-950/40 text-emerald-300',
+        yellow: 'border-amber-900/60 bg-amber-950/30 text-amber-200',
+        red: 'border-rose-900/60 bg-rose-950/30 text-rose-200'
+      };
+      const item = document.createElement('div');
+      item.className = `rounded-2xl border px-3 py-2 text-xs ${tones[tone] || tones.slate}`;
+      item.innerHTML = `<span class="font-black text-[11px] mr-2">${formatClock(state.simTime)}</span>${text}`;
+      el.log.prepend(item);
+      while (el.log.children.length > 40) el.log.removeChild(el.log.lastChild);
+    }
+
     function initDesks() {
-      const container = document.getElementById('desks-container');
-      container.innerHTML = '';
-      const rows = 3, cols = 4;
+      el.desks.innerHTML = '';
+      const rows = 3;
+      const cols = 4;
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
           const desk = document.createElement('div');
-          desk.className = 'desk absolute';
-          desk.style.left = `${c * 25 + 4}%`;
-          desk.style.top = `${r * 33 + 5}%`;
+          desk.className = 'desk absolute flex items-center justify-center text-[10px] text-stone-200 font-bold';
+          desk.style.left = `${c * 24 + 4}%`;
+          desk.style.top = `${r * 31 + 4}%`;
           desk.style.width = '18%';
           desk.style.height = '22%';
-          container.appendChild(desk);
+          desk.textContent = `Meja ${r * cols + c + 1}`;
+          el.desks.appendChild(desk);
         }
       }
     }
 
-    function initLampsLayer() {
-      const layer = document.getElementById('lamps-layer');
-      layer.innerHTML = '';
-      lamps.forEach((lamp, i) => {
-        // Light cone
+    function initLamps() {
+      el.lampsLayer.innerHTML = '';
+      state.lamps.forEach((lamp, i) => {
         const cone = document.createElement('div');
         cone.id = `light-cone-${i}`;
         cone.className = 'light-cone absolute rounded-full';
-        cone.style.cssText = `
-          left: ${lamp.x}%; top: ${lamp.y}%;
-          width: ${SENSOR_RADIUS_PERCENT * 2}%; height: ${SENSOR_RADIUS_PERCENT * 2}%;
-          transform: translate(-50%, -50%);
-          background: radial-gradient(circle, rgba(250,204,21,0.12) 0%, rgba(250,204,21,0.03) 60%, transparent 100%);
-          opacity: 0;
-          pointer-events: none;
-        `;
-        layer.appendChild(cone);
+        cone.style.cssText = `left:${lamp.x}%;top:${lamp.y}%;width:${SENSOR_RADIUS_PERCENT * 2}%;height:${SENSOR_RADIUS_PERCENT * 2}%;transform:translate(-50%,-50%) scale(0.95);background:radial-gradient(circle, rgba(253,224,71,0.18) 0%, rgba(250,204,21,0.08) 48%, rgba(250,204,21,0.02) 70%, transparent 100%);opacity:0;`;
 
-        // Sensor range ring
         const ring = document.createElement('div');
         ring.id = `sensor-ring-${i}`;
         ring.className = 'absolute rounded-full border border-dashed';
-        ring.style.cssText = `
-          left: ${lamp.x}%; top: ${lamp.y}%;
-          width: ${SENSOR_RADIUS_PERCENT * 2}%; height: ${SENSOR_RADIUS_PERCENT * 2}%;
-          transform: translate(-50%, -50%);
-          border-color: rgba(34, 197, 94, 0.2);
-          pointer-events: none;
-        `;
-        layer.appendChild(ring);
+        ring.style.cssText = `left:${lamp.x}%;top:${lamp.y}%;width:${SENSOR_RADIUS_PERCENT * 2}%;height:${SENSOR_RADIUS_PERCENT * 2}%;transform:translate(-50%,-50%);border-color:rgba(34,197,94,0.18);`;
 
-        // Lamp icon
+        const pulse = document.createElement('div');
+        pulse.id = `sensor-pulse-${i}`;
+        pulse.className = 'absolute rounded-full border border-emerald-400/40 sensor-pulse';
+        pulse.style.cssText = `left:${lamp.x}%;top:${lamp.y}%;width:${SENSOR_RADIUS_PERCENT * 1.2}%;height:${SENSOR_RADIUS_PERCENT * 1.2}%;display:none;`;
+
         const lampEl = document.createElement('div');
         lampEl.id = `lamp-${i}`;
-        lampEl.className = 'absolute flex items-center justify-center';
-        lampEl.style.cssText = `
-          left: ${lamp.x}%; top: ${lamp.y}%;
-          width: 28px; height: 28px;
-          transform: translate(-50%, -50%);
-          border-radius: 50%;
-          background: #334155;
-          border: 2px solid #475569;
-          z-index: 10;
-        `;
-        lampEl.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`;
-        layer.appendChild(lampEl);
+        lampEl.className = 'lamp-orb absolute rounded-full flex items-center justify-center';
+        lampEl.style.cssText = `left:${lamp.x}%;top:${lamp.y}%;transform:translate(-50%,-50%);width:34px;height:34px;background:#334155;border:2px solid #475569;z-index:10;`;
+        lampEl.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`;
+
+        el.lampsLayer.appendChild(cone);
+        el.lampsLayer.appendChild(ring);
+        el.lampsLayer.appendChild(pulse);
+        el.lampsLayer.appendChild(lampEl);
       });
     }
 
     function initLampStatusGrid() {
-      const grid = document.getElementById('lamp-status-grid');
-      grid.innerHTML = '';
-      lamps.forEach((lamp, i) => {
+      el.lampStatusGrid.innerHTML = '';
+      state.lamps.forEach((lamp, i) => {
         const card = document.createElement('div');
         card.id = `lamp-card-${i}`;
-        card.className = 'rounded-lg p-2 text-center border border-slate-700 bg-slate-800';
+        card.className = 'status-card rounded-2xl border border-slate-800 bg-slate-900/70 p-3';
         card.innerHTML = `
-          <div class="text-xs text-slate-500 font-600">Lampu ${i + 1}</div>
-          <div id="lamp-card-status-${i}" class="text-xs font-800 text-slate-600 mt-0.5">OFF</div>
-          <div id="lamp-card-timer-${i}" class="text-xs text-slate-600 mt-0.5" style="font-size:0.6rem;">—</div>
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <div>
+              <div class="text-xs text-slate-500 font-bold uppercase tracking-wide">Lampu ${i + 1}</div>
+              <div id="lamp-card-status-${i}" class="text-sm font-black text-slate-300 mt-1">OFF</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center border border-slate-700">
+              <i data-lucide="lightbulb" class="w-4 h-4 text-slate-500"></i>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-500 mb-1">Sisa timer</div>
+          <div id="lamp-card-time-${i}" class="text-xs font-bold text-slate-300 mb-2">—</div>
+          <div class="mini-progress h-2 rounded-full">
+            <span id="lamp-card-progress-${i}" style="width:0%"></span>
+          </div>
         `;
-        grid.appendChild(card);
+        el.lampStatusGrid.appendChild(card);
       });
+      lucide.createIcons();
     }
 
-    // ===================== PEOPLE =====================
-    function createPeople(count) {
-      people = [];
-      const layer = document.getElementById('people-layer');
-      layer.innerHTML = '';
+    function createPersonNode(id) {
+      const wrap = document.createElement('div');
+      wrap.id = `person-${id}`;
+      wrap.className = 'person absolute';
+      wrap.style.cssText = 'width:24px;height:32px;z-index:20;transform:translate(-50%,-50%);';
+      wrap.innerHTML = `
+        <div class="relative w-full h-full">
+          <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-amber-200 border border-amber-100"></div>
+          <div class="absolute top-3.5 left-1/2 -translate-x-1/2 w-4.5 h-6 rounded-lg bg-sky-500 border border-sky-300"></div>
+        </div>
+      `;
+      return wrap;
+    }
 
+    function randomVelocity() {
+      return {
+        vx: (Math.random() - 0.5) * 10,
+        vy: (Math.random() - 0.5) * 10
+      };
+    }
+
+    function createPeople(count) {
+      state.people = [];
+      el.peopleLayer.innerHTML = '';
       for (let i = 0; i < count; i++) {
-        const p = {
+        const vel = randomVelocity();
+        const person = {
           id: i,
           x: 15 + Math.random() * 70,
-          y: 20 + Math.random() * 65,
-          vx: (Math.random() - 0.5) * 8,
-          vy: (Math.random() - 0.5) * 8,
-          changeTimer: Math.random() * 3
+          y: 24 + Math.random() * 60,
+          vx: vel.vx,
+          vy: vel.vy,
+          changeTimer: 1 + Math.random() * 2.5
         };
-        people.push(p);
-
-        const dot = document.createElement('div');
-        dot.id = `person-${i}`;
-        dot.className = 'person-dot absolute rounded-full';
-        dot.style.cssText = `
-          width: 12px; height: 12px;
-          background: radial-gradient(circle at 35% 35%, #60a5fa, #2563eb);
-          border: 1.5px solid #93c5fd;
-          box-shadow: 0 0 6px rgba(96, 165, 250, 0.5);
-          left: ${p.x}%; top: ${p.y}%;
-          transform: translate(-50%, -50%);
-          z-index: 20;
-        `;
-        layer.appendChild(dot);
+        state.people.push(person);
+        const node = createPersonNode(i);
+        node.style.left = `${person.x}%`;
+        node.style.top = `${person.y}%`;
+        el.peopleLayer.appendChild(node);
       }
+      addLog(`Posisi ${count} orang diacak ulang.`, 'slate');
     }
 
-    // ===================== SIMULATION LOOP =====================
-    function simulate(timestamp) {
-      if (!running) return;
-      if (!lastTime) lastTime = timestamp;
-      const dt = Math.min((timestamp - lastTime) / 1000, 0.1);
-      lastTime = timestamp;
-      simTime += dt;
-
-      // Move people
-      people.forEach(p => {
-        p.changeTimer -= dt;
-        if (p.changeTimer <= 0) {
-          p.vx = (Math.random() - 0.5) * 10;
-          p.vy = (Math.random() - 0.5) * 10;
-          p.changeTimer = 1.5 + Math.random() * 3;
+    function updatePeople(dt) {
+      state.people.forEach(person => {
+        person.changeTimer -= dt;
+        if (person.changeTimer <= 0) {
+          const vel = randomVelocity();
+          person.vx = vel.vx;
+          person.vy = vel.vy;
+          person.changeTimer = 1 + Math.random() * 2.5;
         }
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        // Bounce
-        if (p.x < 5) { p.x = 5; p.vx = Math.abs(p.vx); }
-        if (p.x > 95) { p.x = 95; p.vx = -Math.abs(p.vx); }
-        if (p.y < 15) { p.y = 15; p.vy = Math.abs(p.vy); }
-        if (p.y > 92) { p.y = 92; p.vy = -Math.abs(p.vy); }
 
-        const el = document.getElementById(`person-${p.id}`);
-        if (el) {
-          el.style.left = `${p.x}%`;
-          el.style.top = `${p.y}%`;
+        person.x += person.vx * dt * state.simSpeed;
+        person.y += person.vy * dt * state.simSpeed;
+
+        if (person.x < 6) { person.x = 6; person.vx = Math.abs(person.vx); }
+        if (person.x > 94) { person.x = 94; person.vx = -Math.abs(person.vx); }
+        if (person.y < 18) { person.y = 18; person.vy = Math.abs(person.vy); }
+        if (person.y > 92) { person.y = 92; person.vy = -Math.abs(person.vy); }
+
+        const node = document.getElementById(`person-${person.id}`);
+        if (node) {
+          node.style.left = `${person.x}%`;
+          node.style.top = `${person.y}%`;
+          node.style.transform = `translate(-50%,-50%) scaleX(${person.vx >= 0 ? 1 : -1})`;
         }
       });
+    }
 
-      // Check sensor detection
+    function checkSensors(dt) {
       const classroom = document.getElementById('classroom');
       const cw = classroom.offsetWidth;
       const ch = classroom.offsetHeight;
       const sensorR = SENSOR_RADIUS_PERCENT / 100;
 
-      lamps.forEach((lamp, i) => {
+      state.lamps.forEach((lamp, i) => {
         let detected = false;
-        if (sensorEnabled) {
-          people.forEach(p => {
-            const dx = (lamp.x - p.x) / 100;
-            const dy = (lamp.y - p.y) / 100 * (cw / ch);
+        if (state.sensorEnabled) {
+          state.people.forEach(person => {
+            const dx = (lamp.x - person.x) / 100;
+            const dy = ((lamp.y - person.y) / 100) * (cw / ch);
             const dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < sensorR) detected = true;
           });
         }
 
         if (detected) {
+          if (!lamp.detected) addLog(`Lampu ${i + 1} mendeteksi gerakan dan menyala.`, 'green');
           lamp.on = true;
-          lamp.timer = timeout;
+          lamp.timer = state.timeout;
         } else if (lamp.on) {
-          lamp.timer -= dt;
+          lamp.timer -= dt * state.simSpeed;
           if (lamp.timer <= 0) {
             lamp.on = false;
             lamp.timer = 0;
+            addLog(`Lampu ${i + 1} mati karena tidak ada gerakan.`, 'yellow');
           }
         }
+        lamp.detected = detected;
       });
-
-      // Calculate energy
-      const lampsOn = lamps.filter(l => l.on).length;
-      totalEnergy += (lampsOn * LAMP_POWER * dt) / 3600;
-
-      updateVisuals();
-      animFrame = requestAnimationFrame(simulate);
     }
 
-    function updateVisuals() {
-      const lampsOn = lamps.filter(l => l.on).length;
+    function updateEnergy(dt) {
+      const lampsOn = state.lamps.filter(l => l.on).length;
+      const dtHours = (dt * state.simSpeed) / 3600;
+      state.dailyEnergyKWh += ((lampsOn * state.lampPower) / 1000) * dtHours;
+      state.simTime += dt * state.simSpeed;
+    }
 
-      lamps.forEach((lamp, i) => {
+    function updateLampVisuals() {
+      state.lamps.forEach((lamp, i) => {
         const lampEl = document.getElementById(`lamp-${i}`);
-        const coneEl = document.getElementById(`light-cone-${i}`);
-        const ringEl = document.getElementById(`sensor-ring-${i}`);
-        const cardEl = document.getElementById(`lamp-card-${i}`);
-        const statusEl = document.getElementById(`lamp-card-status-${i}`);
-        const timerEl = document.getElementById(`lamp-card-timer-${i}`);
+        const svg = lampEl.querySelector('svg');
+        const cone = document.getElementById(`light-cone-${i}`);
+        const ring = document.getElementById(`sensor-ring-${i}`);
+        const pulse = document.getElementById(`sensor-pulse-${i}`);
+        const card = document.getElementById(`lamp-card-${i}`);
+        const status = document.getElementById(`lamp-card-status-${i}`);
+        const time = document.getElementById(`lamp-card-time-${i}`);
+        const progress = document.getElementById(`lamp-card-progress-${i}`);
 
         if (lamp.on) {
-          lampEl.style.background = '#fef08a';
+          lampEl.style.background = '#fde047';
           lampEl.style.borderColor = '#facc15';
-          lampEl.querySelector('svg').setAttribute('stroke', '#a16207');
-          lampEl.querySelector('svg').setAttribute('fill', '#fde047');
-          if (!lampEl.classList.contains('lamp-on')) lampEl.classList.add('lamp-on');
-          coneEl.style.opacity = '1';
-          cardEl.style.borderColor = '#facc15';
-          cardEl.style.background = 'rgba(250,204,21,0.1)';
-          statusEl.textContent = 'ON';
-          statusEl.style.color = '#facc15';
-          timerEl.textContent = `${Math.ceil(lamp.timer)}s`;
-          timerEl.style.color = '#fbbf24';
+          lampEl.classList.add('lamp-on');
+          svg.setAttribute('stroke', '#854d0e');
+          svg.setAttribute('fill', '#fef08a');
+          cone.style.opacity = '1';
+          cone.style.transform = 'translate(-50%,-50%) scale(1)';
+          ring.style.borderColor = lamp.detected ? 'rgba(34,197,94,0.55)' : 'rgba(250,204,21,0.35)';
+          pulse.style.display = lamp.detected ? 'block' : 'none';
+          card.classList.add('active');
+          status.textContent = 'ON';
+          status.className = 'text-sm font-black text-yellow-300 mt-1';
+          time.textContent = `${Math.ceil(lamp.timer)} detik`;
+          const pct = Math.max(0, Math.min(100, (lamp.timer / state.timeout) * 100));
+          progress.style.width = `${pct}%`;
         } else {
           lampEl.style.background = '#334155';
           lampEl.style.borderColor = '#475569';
-          lampEl.querySelector('svg').setAttribute('stroke', '#94a3b8');
-          lampEl.querySelector('svg').setAttribute('fill', 'none');
           lampEl.classList.remove('lamp-on');
-          coneEl.style.opacity = '0';
-          cardEl.style.borderColor = '#334155';
-          cardEl.style.background = '#1e293b';
-          statusEl.textContent = 'OFF';
-          statusEl.style.color = '#64748b';
-          timerEl.textContent = '—';
-          timerEl.style.color = '#475569';
+          svg.setAttribute('stroke', '#94a3b8');
+          svg.setAttribute('fill', 'none');
+          cone.style.opacity = '0';
+          cone.style.transform = 'translate(-50%,-50%) scale(0.95)';
+          ring.style.borderColor = state.sensorEnabled ? 'rgba(34,197,94,0.18)' : 'rgba(100,116,139,0.15)';
+          pulse.style.display = 'none';
+          card.classList.remove('active');
+          status.textContent = 'OFF';
+          status.className = 'text-sm font-black text-slate-300 mt-1';
+          time.textContent = '—';
+          progress.style.width = '0%';
         }
-
-        ringEl.style.borderColor = sensorEnabled
-          ? (lamp.on ? 'rgba(250,204,21,0.3)' : 'rgba(34,197,94,0.15)')
-          : 'rgba(100,116,139,0.1)';
       });
-
-      document.getElementById('energy-display').textContent = `${totalEnergy.toFixed(2)} Wh`;
-      document.getElementById('lamps-on-display').textContent = `${lampsOn}/${lamps.length} ON`;
-      document.getElementById('stat-lamps').textContent = lampsOn;
-      document.getElementById('stat-power').textContent = `${lampsOn * LAMP_POWER} W`;
-      document.getElementById('stat-energy').textContent = `${totalEnergy.toFixed(3)} Wh`;
-      document.getElementById('stat-time').textContent = `${Math.floor(simTime)} detik`;
-
-      const maxEnergy = (lamps.length * LAMP_POWER * simTime) / 3600;
-      const saving = maxEnergy > 0 ? ((1 - totalEnergy / maxEnergy) * 100) : 0;
-      document.getElementById('stat-saving').textContent = `${saving.toFixed(1)}%`;
     }
 
-    // ===================== CONTROLS =====================
-    document.getElementById('people-slider').addEventListener('input', (e) => {
-      peopleCount = parseInt(e.target.value);
-      document.getElementById('people-count-label').textContent = peopleCount;
-      createPeople(peopleCount);
-    });
+    function updateStats() {
+      const lampsOn = state.lamps.filter(l => l.on).length;
+      const activePower = lampsOn * state.lampPower;
+      const monthlyEnergy = state.dailyEnergyKWh * state.daysPerMonth;
+      const monthlyCost = monthlyEnergy * state.tariff;
+      const maxDailyEnergy = ((state.lamps.length * state.lampPower) / 1000) * (state.simTime / 3600 || 0);
+      const saving = maxDailyEnergy > 0 ? (1 - state.dailyEnergyKWh / maxDailyEnergy) * 100 : 0;
 
-    document.getElementById('timeout-slider').addEventListener('input', (e) => {
-      timeout = parseInt(e.target.value);
-      document.getElementById('timeout-label').textContent = timeout;
-    });
+      el.headerLampsOn.textContent = `${lampsOn} / ${state.lamps.length}`;
+      el.headerEnergy.textContent = `${state.dailyEnergyKWh.toFixed(3)} kWh`;
+      el.headerCost.textContent = formatRp(monthlyCost);
+      el.dailyEnergyCard.textContent = `${state.dailyEnergyKWh.toFixed(3)} kWh`;
+      el.monthlyEnergyCard.textContent = `${monthlyEnergy.toFixed(3)} kWh`;
+      el.activePowerCard.textContent = `${activePower} W`;
+      el.simTimeCard.textContent = formatClock(state.simTime);
+      el.statLamps.textContent = lampsOn;
+      el.statPower.textContent = `${activePower} W`;
+      el.statEnergyDaily.textContent = `${state.dailyEnergyKWh.toFixed(3)} kWh`;
+      el.statEnergyMonthly.textContent = `${monthlyEnergy.toFixed(3)} kWh`;
+      el.statCost.textContent = formatRp(monthlyCost);
+      el.statSaving.textContent = `${Math.max(0, saving).toFixed(1)}%`;
+    }
 
-    document.getElementById('sensor-toggle').addEventListener('click', () => {
-      sensorEnabled = !sensorEnabled;
-      const btn = document.getElementById('sensor-toggle');
-      const thumb = btn.querySelector('.toggle-thumb');
-      if (sensorEnabled) {
-        btn.style.backgroundColor = '#22c55e';
+    function renderAll() {
+      updateLampVisuals();
+      updateStats();
+    }
+
+    function stepSimulation(dt = 1 / 60) {
+      updatePeople(dt);
+      checkSensors(dt);
+      updateEnergy(dt);
+      renderAll();
+    }
+
+    function loop(ts) {
+      if (!state.running) return;
+      if (!state.lastTime) state.lastTime = ts;
+      const dt = Math.min(0.05, (ts - state.lastTime) / 1000);
+      state.lastTime = ts;
+      stepSimulation(dt);
+      state.raf = requestAnimationFrame(loop);
+    }
+
+    function setRunning(isRunning) {
+      state.running = isRunning;
+      state.lastTime = 0;
+      if (isRunning) {
+        el.play.innerHTML = '<i data-lucide="pause" class="w-4 h-4"></i> Jeda';
+        addLog('Simulasi dijalankan.', 'green');
+        lucide.createIcons();
+        state.raf = requestAnimationFrame(loop);
+      } else {
+        if (state.raf) cancelAnimationFrame(state.raf);
+        el.play.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Mulai';
+        addLog('Simulasi dijeda.', 'slate');
+        lucide.createIcons();
+      }
+    }
+
+    function toggleSensor() {
+      state.sensorEnabled = !state.sensorEnabled;
+      const thumb = el.sensorToggle.querySelector('.toggle-thumb');
+      if (state.sensorEnabled) {
+        el.sensorToggle.classList.remove('bg-slate-600');
+        el.sensorToggle.classList.add('bg-emerald-500');
         thumb.style.transform = 'translateX(1.25rem)';
+        addLog('Sensor gerak diaktifkan.', 'green');
       } else {
-        btn.style.backgroundColor = '#475569';
+        el.sensorToggle.classList.remove('bg-emerald-500');
+        el.sensorToggle.classList.add('bg-slate-600');
         thumb.style.transform = 'translateX(0)';
-        lamps.forEach(l => { l.on = false; l.timer = 0; });
+        state.lamps.forEach(l => { l.on = false; l.timer = 0; l.detected = false; });
+        addLog('Sensor gerak dimatikan. Semua lampu dipadamkan.', 'red');
       }
-    });
+      renderAll();
+    }
 
-    document.getElementById('btn-play').addEventListener('click', () => {
-      if (running) {
-        running = false;
-        document.getElementById('btn-play').innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Mulai';
-        lucide.createIcons();
-      } else {
-        running = true;
-        lastTime = 0;
-        document.getElementById('btn-play').innerHTML = '<i data-lucide="pause" class="w-4 h-4"></i> Jeda';
-        lucide.createIcons();
-        animFrame = requestAnimationFrame(simulate);
-      }
-    });
-
-    document.getElementById('btn-reset').addEventListener('click', () => {
-      running = false;
-      lastTime = 0;
-      simTime = 0;
-      totalEnergy = 0;
-      lamps.forEach(l => { l.on = false; l.timer = 0; });
-      createPeople(peopleCount);
-      updateVisuals();
-      document.getElementById('btn-play').innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Mulai';
+    function resetSimulation() {
+      if (state.raf) cancelAnimationFrame(state.raf);
+      state.running = false;
+      state.lastTime = 0;
+      state.simTime = 0;
+      state.dailyEnergyKWh = 0;
+      state.lamps.forEach(l => { l.on = false; l.timer = 0; l.detected = false; });
+      createPeople(state.peopleCount);
+      el.play.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Mulai';
       lucide.createIcons();
-    });
+      renderAll();
+      addLog('Simulasi direset ke kondisi awal.', 'red');
+    }
 
-    // ===================== ELEMENT SDK =====================
-    window.elementSdk.init({
-      defaultConfig,
-      onConfigChange: async (config) => {
-        const title = config.page_title || defaultConfig.page_title;
-        const explTitle = config.sensor_explanation_title || defaultConfig.sensor_explanation_title;
-        const bg = config.bg_color || defaultConfig.bg_color;
-        const surface = config.surface_color || defaultConfig.surface_color;
-        const text = config.text_color || defaultConfig.text_color;
-        const accent = config.accent_color || defaultConfig.accent_color;
-        const highlight = config.highlight_color || defaultConfig.highlight_color;
-        const font = config.font_family || defaultConfig.font_family;
+    function bindEvents() {
+      el.peopleSlider.addEventListener('input', e => {
+        state.peopleCount = parseInt(e.target.value, 10);
+        el.peopleCountLabel.textContent = state.peopleCount;
+        createPeople(state.peopleCount);
+      });
 
-        document.getElementById('page-title').textContent = title;
-        document.getElementById('explanation-title').childNodes[document.getElementById('explanation-title').childNodes.length - 1].textContent = ' ' + explTitle;
+      el.timeoutSlider.addEventListener('input', e => {
+        state.timeout = parseInt(e.target.value, 10);
+        el.timeoutLabel.textContent = `${state.timeout} detik`;
+      });
 
-        document.body.style.backgroundColor = bg;
-        document.body.style.color = text;
-        document.body.style.fontFamily = `${font}, Nunito, sans-serif`;
+      el.speedSlider.addEventListener('input', e => {
+        state.simSpeed = parseFloat(e.target.value);
+        el.speedLabel.textContent = `${state.simSpeed.toFixed(1)}x`;
+      });
 
-        // Apply font to all elements
-        document.querySelectorAll('h1, h2, p, span, label, button, div').forEach(el => {
-          el.style.fontFamily = `${font}, Nunito, sans-serif`;
-        });
-      },
-      mapToCapabilities: (config) => ({
-        recolorables: [
-          {
-            get: () => config.bg_color || defaultConfig.bg_color,
-            set: (v) => { config.bg_color = v; window.elementSdk.setConfig({ bg_color: v }); }
-          },
-          {
-            get: () => config.surface_color || defaultConfig.surface_color,
-            set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
-          },
-          {
-            get: () => config.text_color || defaultConfig.text_color,
-            set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
-          },
-          {
-            get: () => config.accent_color || defaultConfig.accent_color,
-            set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }
-          },
-          {
-            get: () => config.highlight_color || defaultConfig.highlight_color,
-            set: (v) => { config.highlight_color = v; window.elementSdk.setConfig({ highlight_color: v }); }
-          }
-        ],
-        borderables: [],
-        fontEditable: {
-          get: () => config.font_family || defaultConfig.font_family,
-          set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
-        },
-        fontSizeable: undefined
-      }),
-      mapToEditPanelValues: (config) => new Map([
-        ['page_title', config.page_title || defaultConfig.page_title],
-        ['sensor_explanation_title', config.sensor_explanation_title || defaultConfig.sensor_explanation_title]
-      ])
-    });
+      el.powerInput.addEventListener('input', e => {
+        state.lampPower = Math.max(1, parseInt(e.target.value || '1', 10));
+        renderAll();
+      });
 
-    // ===================== INIT =====================
-    initDesks();
-    initLampsLayer();
-    initLampStatusGrid();
-    createPeople(peopleCount);
-    updateVisuals();
-    lucide.createIcons();
+      el.tariffInput.addEventListener('input', e => {
+        state.tariff = Math.max(1, parseInt(e.target.value || '1', 10));
+        renderAll();
+      });
+
+      el.daysInput.addEventListener('input', e => {
+        state.daysPerMonth = Math.max(1, parseInt(e.target.value || '30', 10));
+        renderAll();
+      });
+
+      el.sensorToggle.addEventListener('click', toggleSensor);
+      el.play.addEventListener('click', () => setRunning(!state.running));
+      el.step.addEventListener('click', () => {
+        if (!state.running) {
+          stepSimulation(0.2);
+          addLog('Simulasi dijalankan 1 langkah.', 'slate');
+        }
+      });
+      el.reset.addEventListener('click', resetSimulation);
+      el.spawn.addEventListener('click', () => createPeople(state.peopleCount));
+    }
+
+    function init() {
+      initDesks();
+      initLamps();
+      initLampStatusGrid();
+      createPeople(state.peopleCount);
+      bindEvents();
+      renderAll();
+      addLog('Sistem siap. Tekan tombol Mulai untuk menjalankan simulasi.', 'green');
+      lucide.createIcons();
+    }
+
+    init();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9df0db8bc56cf91c',t:'MTc3Mzk2OTI0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
